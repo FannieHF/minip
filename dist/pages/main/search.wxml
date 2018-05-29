@@ -1,0 +1,64 @@
+
+  <view class="main-search">
+    <block  wx:if="{{items1}}">
+      
+  <view class="checkbox-button">
+    <view  wx:if="{{$checkboxButton1$hasTitle}}" class="checkbox-title">{{$checkboxButton1$title}}</view>
+    <checkbox-group style="margin-right: {{$checkboxButton1$style_gutter_edge}}" bindchange="$checkboxButton1$checkboxChange">
+      <view class="checkbox-wrapper"  wx:for="{{$checkboxButton1$list}}" wx:key="index" style="width:{{$checkboxButton1$style_width}};padding-right: {{$checkboxButton1$style_gutter}};margin-bottom: {{$checkboxButton1$style_gutter}}">
+        <checkbox id="{{$checkboxButton1$unique}}-{{index}}" hidden value="{{item.value}}" checked="{{item.checked}}"/>
+        <label for="{{$checkboxButton1$unique}}-{{index}}" class="checkbox-item{{item.checked ? '-checked' : '' }}">
+          <text>{{item.name}}</text>
+        </label>
+      </view>
+    </checkbox-group>
+  </view>
+
+    </block>
+    <block wx:if="{{items2}}">
+      
+  <view class="checkbox-button">
+    <view  wx:if="{{$checkboxButton2$hasTitle}}" class="checkbox-title">{{$checkboxButton2$title}}</view>
+    <checkbox-group style="margin-right: {{$checkboxButton2$style_gutter_edge}}" bindchange="$checkboxButton2$checkboxChange">
+      <view class="checkbox-wrapper"  wx:for="{{$checkboxButton2$list}}" wx:key="index" style="width:{{$checkboxButton2$style_width}};padding-right: {{$checkboxButton2$style_gutter}};margin-bottom: {{$checkboxButton2$style_gutter}}">
+        <checkbox id="{{$checkboxButton2$unique}}-{{index}}" hidden value="{{item.value}}" checked="{{item.checked}}"/>
+        <label for="{{$checkboxButton2$unique}}-{{index}}" class="checkbox-item{{item.checked ? '-checked' : '' }}">
+          <text>{{item.name}}</text>
+        </label>
+      </view>
+    </checkbox-group>
+  </view>
+
+    </block>
+    <block wx:if="{{items3}}">
+      
+  <view class="checkbox-button">
+    <view  wx:if="{{$checkboxButton3$hasTitle}}" class="checkbox-title">{{$checkboxButton3$title}}</view>
+    <checkbox-group style="margin-right: {{$checkboxButton3$style_gutter_edge}}" bindchange="$checkboxButton3$checkboxChange">
+      <view class="checkbox-wrapper"  wx:for="{{$checkboxButton3$list}}" wx:key="index" style="width:{{$checkboxButton3$style_width}};padding-right: {{$checkboxButton3$style_gutter}};margin-bottom: {{$checkboxButton3$style_gutter}}">
+        <checkbox id="{{$checkboxButton3$unique}}-{{index}}" hidden value="{{item.value}}" checked="{{item.checked}}"/>
+        <label for="{{$checkboxButton3$unique}}-{{index}}" class="checkbox-item{{item.checked ? '-checked' : '' }}">
+          <text>{{item.name}}</text>
+        </label>
+      </view>
+    </checkbox-group>
+  </view>
+
+    </block>
+    <block wx:if="{{items4}}">
+      
+  <view class="checkbox-button">
+    <view  wx:if="{{$checkboxButton4$hasTitle}}" class="checkbox-title">{{$checkboxButton4$title}}</view>
+    <checkbox-group style="margin-right: {{$checkboxButton4$style_gutter_edge}}" bindchange="$checkboxButton4$checkboxChange">
+      <view class="checkbox-wrapper"  wx:for="{{$checkboxButton4$list}}" wx:key="index" style="width:{{$checkboxButton4$style_width}};padding-right: {{$checkboxButton4$style_gutter}};margin-bottom: {{$checkboxButton4$style_gutter}}">
+        <checkbox id="{{$checkboxButton4$unique}}-{{index}}" hidden value="{{item.value}}" checked="{{item.checked}}"/>
+        <label for="{{$checkboxButton4$unique}}-{{index}}" class="checkbox-item{{item.checked ? '-checked' : '' }}">
+          <text>{{item.name}}</text>
+        </label>
+      </view>
+    </checkbox-group>
+  </view>
+
+    </block>
+    <button bindtap="search" class="weui-btn" type="primary">搜索</button>
+  </view>

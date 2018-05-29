@@ -1,0 +1,2 @@
+@import "./../../components/radioCard.wxss";
+.borrow-subscribe .weui-media-box__title{padding-bottom:.5em}.borrow-subscribe .borrow-address{margin-bottom:1em}.borrow-subscribe .reset-cell-block{display:block !important;padding-bottom:0}.borrow-subscribe .reset-cell-block+.weui-cell:before{display:none}.borrow-subscribe .reset-label-left{color:#999;margin-right:1em;padding-right:1em;border-right:1rpx solid #EFEFEF}.borrow-subscribe .reset-label-right{color:#666;line-height:0;margin-left:1em;padding-left:1em}.borrow-subscribe .reset-input{padding:6px 15px}

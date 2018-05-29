@@ -1,0 +1,15 @@
+{
+	"description": "内部管理工具",
+	"setting": {
+		"urlCheck": true,
+		"es6": false,
+		"postcss": false,
+		"minified": false,
+		"newFeature": true
+	},
+	"compileType": "miniprogram",
+	"appid": "wx99dbb4a821e5f830",
+	"projectname": "myshukun",
+	"miniprogramRoot": "./dist",
+	"condition": {}
+}

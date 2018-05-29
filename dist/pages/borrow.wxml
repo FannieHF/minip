@@ -1,0 +1,65 @@
+
+  <view  wx:if="{{canBorrow}}" class="page-borrow">
+    <view class="weui-panel borrow-list">
+      <view class="weui-panel__hd">
+        <text>本次最多可借</text>
+        <text class="color-red">{{borrowCount}}本</text>
+        <text>，还可借</text>
+        <text class="color-red">{{borrowTime}}次</text><text>。</text>
+      </view>
+      <view class="weui-panel__bd">
+        <block wx:for="{{borrowList}}" wx:key="index">
+          <view class="weui-media-box weui-media-box_text">
+            <block wx:if="{{item.good}}">
+              <view class="icon-order-circle">{{index+1}}</view>
+              <view class="borrow-name-wrapper">
+                <view class="borrow-book-name">{{item.good.name}}</view>
+              </view>
+              <view bindtap="remove" class="icon-delete reset-pull-right" data-wpyremove-a="{{item.good}}"/>
+            </block><block wx:else>
+              <view class="icon-order-empty">{{index+1}}</view>
+              <view class="borrow-name-wrapper">
+                <view class="borrow-book-name color-ddd">空</view>
+              </view>
+              <view bindtap="goMain" class="link link-blue reset-pull-right">去借书</view>
+            </block>
+          </view>
+        </block>
+      </view>
+    </view>
+    <view class="weui-panel">
+      <view class="weui-media-box weui-media-box_text borrow-address">
+        <view class="weui-media-box__title h4 color-666">收货地址</view>
+        <view class="weui-cell__bd h4">
+          <textarea bindinput="typing" class="weui-textarea" value="{{address}}" placeholder="请填写收货地址" auto-height data-wpytyping-a="address"/>
+        </view>
+        <view bindtap="chooseAddress" wx:if="{{showChooseAddress}}" class="link link-red reset-pull-middle">
+          <image src="/images/icon/icon-location@2x.png" class="imgicon icon-location" mode="aspectFit"/>
+        </view>
+      </view>
+      <view class="weui-cell weui-cell_input">
+        <view class="weui-cell__hd">
+          <view class="weui-label reset-label-left h4">手机号码</view>
+        </view>
+        <view class="weui-cell__bd h4">
+          <input bindinput="typing" class="weui-input" value="{{phone}}" placeholder="请填写收货人手机号码" data-wpytyping-a="phone"/>
+        </view>
+      </view>
+      <view class="weui-cell weui-cell_input">
+        <view class="weui-cell__hd">
+          <view class="weui-label reset-label-left h4">收货人</view>
+        </view>
+        <view class="weui-cell__bd h4">
+          <input bindinput="typing" class="weui-input" value="{{receiver}}" placeholder="请填写收货人姓名" data-wpytyping-a="receiver"/>
+        </view>
+      </view>
+    </view>
+    <button bindtap="borrow" class="weui-btn btn-primary" type="primary">确认</button>
+  </view>
+  <view  wx:else class="text-center tip-page page-borrow-tip">
+    <block wx:if="{{loaded}}">
+      <icon class="tip-icon" type="cancel" size="70" color="#bbb"/>
+      <view class="h4">您还没有订阅，快去选择吧~</view>
+      <button bindtap="toSubscribe" class="weui-btn mini-btn" type="primary" size="mini">立即订阅</button>
+    </block>
+  </view>

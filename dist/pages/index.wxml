@@ -1,0 +1,20 @@
+
+  <view class="page-index">
+    <view class="page__hd">
+        <view class="page__title">Grid</view>
+    </view>
+    <view class="page__bd">
+        <view class="weui-grids">
+            <block  wx:for="0" wx:key="*this">
+                <navigator url="/pages/user" class="weui-grid" hover-class="weui-grid_active">
+                    <view class="weui-grid__label">计划管理</view>
+                </navigator>
+            </block>
+            <block  wx:for="{{grids}}" wx:key="*this">
+                <navigator url="" class="weui-grid" hover-class="weui-grid_active">
+                    <view class="weui-grid__label">Grid</view>
+                </navigator>
+            </block>
+        </view>
+    </view>
+  </view>

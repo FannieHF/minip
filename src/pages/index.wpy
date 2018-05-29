@@ -1,0 +1,67 @@
+<template>
+  <view class="page-index">
+    <view class="page__hd">
+        <view class="page__title">Grid</view>
+    </view>
+    <view class="page__bd">
+        <view class="weui-grids">
+            <block wx:for="0" wx:key="*this">
+                <navigator url="/pages/user" class="weui-grid" hover-class="weui-grid_active">
+                    <view class="weui-grid__label">计划管理</view>
+                </navigator>
+            </block>
+            <block wx:for="{{grids}}" wx:key="*this">
+                <navigator url="" class="weui-grid" hover-class="weui-grid_active">
+                    <view class="weui-grid__label">Grid</view>
+                </navigator>
+            </block>
+        </view>
+    </view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import { service } from '../config.js'
+  import base from '../mixins/base'
+  import http from '../mixins/http'
+
+  export default class pageIndex extends wepy.page {
+    mixins = [base, http]
+    config = {
+      navigationBarTitleText: '我的数坤',
+      navigationBarTextStyle: 'white',
+      navigationBarBackgroundColor: '#049BFF'
+    }
+    data = {
+      grids: [ 1, 2, 3, 4, 5, 6, 7, 8]
+    }
+
+    onReady() {
+      this.initPageData()
+    }
+
+    onPullDownRefresh() {
+      this.initPageData()
+    }
+
+    onReachBottom() {
+    }
+
+    // 初始化页面数据
+    initPageData() {
+    }
+
+    methods = {
+    }
+
+    components = {
+    }
+  }
+</script>
+
+<style lang="less">
+.page-index{
+  // some style
+}
+</style>

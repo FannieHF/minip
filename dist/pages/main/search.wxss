@@ -1,0 +1,2 @@
+@import "./../../components/checkboxButton.wxss";
+page{background:#fff}.main-search{position:relative;padding:14px 15px 10px}

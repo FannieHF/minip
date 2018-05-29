@@ -1,0 +1,60 @@
+
+  <view class="user-borrow">
+    <block  wx:if="{{loading}}">
+      <view class="weui-loadmore">
+        <view class="weui-loading"/>
+        <view class="weui-loadmore__tips">正在加载</view>
+      </view>
+    </block>
+    <block  wx:elif="{{list && list.length > 0}}">
+      <block wx:for="{{list}}" wx:key="index">
+        <view class="weui-panel">
+          <view class="weui-panel__hd">
+            <text>{{item.date || '借阅日期'}}</text>
+            <text class="pull-right">
+              <block wx:if="{{item.status == 2}}">
+                <block wx:if="{{item.remain < 0}}">
+                  <text>逾期 </text>
+                  <text class="color-red">{{-item.remain}}</text>
+                  <text> 天未归还</text>
+                </block>
+                <block wx:else>
+                  <text>还剩 </text>
+                  <text class="color-green">{{item.remain}}</text>
+                  <text> 天需归还</text>
+                </block>
+              </block>
+              <text wx:else>{{item.statusText || '借阅状态'}}</text>
+            </text>
+          </view>
+          <view class="weui-panel__bd">
+            <view class="weui-media-box weui-media-box_appmsg">
+              <view class="weui-media-box__hd weui-media-box__hd_in-appmsg">
+                <block wx:for="{{item.books}}" wx:key="index" wx:for-item="book">
+                  <image class="weui-media-box__thumb" src="{{book.image}}" mode="aspectFit"/>
+                </block>
+              </view>
+              <view class="weui-media-box__bd weui-media-box__bd_in-appmsg">
+                <block wx:for="{{item.books}}" wx:key="index" wx:for-item="book">
+                  <view class="weui-media-box__desc">{{index+1}}. {{book.title}}</view>
+                </block>
+              </view>
+            </view>
+          </view>
+          <view wx:if="{{2 == item.status}}" class="weui-panel__ft weui-cells">
+            <view class="weui-cell">
+              <button bindtap="goReturn" class="weui-btn mini-btn" type="default" size="mini" data-wpygoreturn-a="{{item.id || ''}}">立即还书</button>
+            </view>
+          </view>
+        </view>
+      </block>
+      <view class="weui-loadmore weui-loadmore_line weui-loadmore_dot">
+        <view class="weui-loadmore__tips weui-loadmore__tips_in-line weui-loadmore__tips_in-dot"/>
+      </view>
+    </block>
+    <block wx:else>
+      <view class="weui-loadmore weui-loadmore_line">
+        <view class="weui-loadmore__tips weui-loadmore__tips_in-line">暂无数据</view>
+      </view>
+    </block>
+  </view>

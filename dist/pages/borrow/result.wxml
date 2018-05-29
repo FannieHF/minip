@@ -1,0 +1,21 @@
+
+  <view class="borrow-result tip-page">
+
+    <block  wx:if="{{type == 0}}">
+      <icon class="tip-icon" type="success" size="70" color="#049BFF"/>
+      <view class="h3 color-blue">借阅成功</view>
+      <view class="h4 color-999">
+        <view>寻寻觅觅 冷冷清清 凄凄惨惨戚戚</view>
+        <view>乍暖还寒时候 最难将息</view>
+      </view>
+      <button bindtap="jump" class="weui-btn mini-btn" type="default" size="mini">查看订单</button>
+    </block><block  wx:else>
+      <icon class="tip-icon" type="warn" size="70"/>
+      <view class="h3 color-blue">借阅失败</view>
+      <view class="h4 color-999">
+        <view>{{message}}</view>
+      </view>
+      <button bindtap="back" class="weui-btn mini-btn" type="primary" size="mini">{{buttonText}}</button>
+    </block>
+
+  </view>
