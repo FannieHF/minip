@@ -1,0 +1,235 @@
+<template>
+  <view>
+    <view class="weui-cells__title">目标标题</view>
+    <view class="weui-cells weui-cells_after-title">
+      <view class="weui-cell weui-cell_input">
+        <view class="weui-cell__bd">
+          <input class="weui-input" placeholder-class="phcolor" 
+            placeholder="请输入文本" id="name" bindinput="bindInput"/>
+        </view>
+      </view>
+    </view>
+    <view class="weui-cells__title">目标描述</view>
+      <view class="weui-cells weui-cells_after-title">
+        <view class="weui-cell">
+          <view class="weui-cell__bd">
+            <textarea class="weui-textarea" placeholder-class="phcolor" placeholder="请输入文本" 
+              id="content" style="height: 3.3em" bindinput="bindInput" maxlength='500' adjust-position/>
+            <view class="weui-textarea-counter">{{restCharLen}}/500</view>
+          </view>
+        </view>
+      </view>
+    </view>
+    
+    <view class="weui-cells__title">时间设定</view>
+    <view class="weui-cells weui-cells_after-title">
+      <view class="weui-cell weui-cell_input">
+        <view class="weui-cell__hd">
+          <view class="weui-label">起始时间</view>
+        </view>
+        <view class="weui-cell__bd">
+          <picker mode="date" value="{{formAttr.expectedStartDate}}" id="expectedStartDate" bindchange="bindPickerChange">
+            <view class="weui-input">{{formAttr.expectedStartDate}}</view>
+          </picker>
+        </view>
+      </view>
+      <view class="weui-cell weui-cell_input">
+        <view class="weui-cell__hd">
+          <view class="weui-label">完成时间</view>
+        </view>
+        <view class="weui-cell__bd">
+          <picker mode="date" value="{{formAttr.expectedEndDate}}" id="expectedEndDate" bindchange="bindPickerChange">
+            <view class="weui-input">{{formAttr.expectedEndDate}}</view>
+          </picker>
+        </view>
+      </view>
+    </view>
+
+    <view class="weui-cells__title">优先级</view>
+      <view class="weui-cells weui-cells_after-title">
+        <view class="weui-cell weui-cell_select">
+          <view class="weui-cell__bd">
+            <picker value="{{formAttr.priority - 1}}" id="priority" 
+              range="{{priors}}" bindchange="bindPickerChange">
+              <view class="weui-select">{{priors[formAttr.priority - 1]}}</view>
+            </picker>
+          </view>
+        </view>
+      </view>
+    </view>
+
+
+    <block wx:if="{{ level > 0}}" >
+      <view class="weui-cells__title">一号位</view>
+      <view class="weui-cells weui-cells_after-title">
+        <view class="weui-cell weui-cell_select">
+          <view class="weui-cell__bd">
+            <picker range-key="name" value="{{ownerIndex}}" id="owner" 
+              range="{{owners}}" bindchange="bindOwnerChange" mode="selector">
+              <view class="weui-select">{{owners[ownerIndex].name}}</view>
+            </picker>
+          </view>
+        </view>
+      </view>
+
+      <view class="weui-cells__title">相关人员</view>
+      <navigator url="{{setConcernedUrl}}" class="weui-cells weui-cells_after-title">
+        <view class="concerned_text weui-cell">
+          <block wx:if="{{relatedUsers}}"  wx:for="{{relatedUsers}}" wx:key="{{item.id}}">
+            {{item.name}} 
+          </block>
+          <image class="add-image weui-flex__item" src="../images/icon/add.svg" mode="aspectFit"/>
+        </view>
+      </navigator>
+    </block>
+
+    <view class="page__bd_btn-spacing">
+      <button class="weui-btn" type="primary" @tap="bindSubmit" >完成</button>
+    </view>
+
+  </view>
+
+  <toast />
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import moment from 'moment'
+  import toast from 'wepy-com-toast'
+  import toastMixin from '../mixins/toast.js'
+  import formMixin from '../mixins/form.js'
+  import { service } from '../config.js'
+
+  export default class formAdd extends wepy.component {
+    mixins = [toastMixin, formMixin]
+    props = {
+      parentId: {
+        type: [String, Number],
+        default: undefined
+      },
+      relatedUsers: {
+        type: Object,
+        default: undefined
+      },
+      level: [String, Number]
+    }
+    data = {
+      ownerIndex: undefined,
+      owners: undefined,
+
+      formAttr: {
+        name: undefined,
+        content: undefined,
+        priority: 1,
+        expectedStartDate: moment().format('YYYY-MM-DD'),
+        expectedEndDate: moment().add(7, 'd').format('YYYY-MM-DD'),
+        owner: undefined,
+        parent: undefined,
+        relatedUsers: undefined
+      }
+    }
+    components = {
+      toast
+    }
+
+    computed = {
+      setConcernedUrl() {
+        return '/pages/relatedUsers?relatedUsers=' + encodeURIComponent(JSON.stringify(this.relatedUsers))
+      }
+    }
+    methods = {
+      bindOwnerChange(e) {
+        this.ownerIndex = e.detail.value
+      },
+      bindSubmit() {
+        this.formAttr.parent = this.parentId === undefined ? null : { id: this.parentId }
+        this.formAttr.level = this.level
+
+        // 校验
+        if (!this.ownerIndex && this.level > 0) {
+          this.showToast('一号位不可为空')
+          return
+        }
+        if (moment(this.formAttr.expectedStartDate).isAfter(moment(this.formAttr.expectedEndDate))) {
+          this.showToast('开始日期不能晚于结束日期')
+          return
+        }
+
+        this.formAttr.owner = this.ownerIndex ? {id: this.owners[this.ownerIndex].id} : this.ownerIndex
+        this.formAttr.relatedUsers = this.relatedUsers
+  
+        // 去除undefined
+        let requestData = {}
+        for (let key in this.formAttr) {
+          if (this.formAttr[key] !== undefined) {
+            requestData[key] = this.formAttr[key]
+          }
+        }
+
+        console.log(requestData)
+        wepy.request({
+          url: service.addGoal,
+          data: requestData,
+          header: wepy.$instance.globalData.header,
+          method: 'POST'
+        }).then(({data}) => {
+          if (data.status === 0) {
+            switch (parseInt(this.level)) {
+              case 0:
+                wepy.redirectTo({
+                  url: '/pages/compGoal'
+                })
+                break
+              default:
+                wepy.navigateBack({
+                  delta: 1
+                })
+                break
+            }
+          } else {
+            this.showToast(data.msg)
+          }
+        })
+      }
+    }
+
+    onLoad() {
+      this.owners = wepy.$instance.globalData.owners
+    }
+  }
+</script>
+
+<style lang="less">
+.page__bd_btn-spacing{
+  margin: 40rpx 0x;
+  padding: 40rpx 0px;
+
+  & > .weui-btn{
+    margin-bottom: 40rpx;
+  }
+}
+.weui-cell {
+  border-width: 0;
+}
+.phcolor{
+  color: #888888;
+}
+.page__title{
+  font-weight: 400;
+  font-size: 44rpx;
+  padding: 40rpx;
+}
+.weui-tab__content{
+  padding-top: 40rpx;
+}
+
+.concerned_text {
+  padding: 20rpx 30rpx;
+}
+.add-image{
+  min-width: 50rpx;
+  max-width: 50rpx;
+  height: 50rpx;
+  padding: 0px 20rpx;
+}
+</style>

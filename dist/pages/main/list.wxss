@@ -1,2 +1,0 @@
-@import "./../../components/bookList.wxss";
-.main-list .width-8p{width:80% !important}.main-list .main-list-title{padding:1em 15px;color:#999999;font-size:14px}

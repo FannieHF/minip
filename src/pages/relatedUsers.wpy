@@ -1,0 +1,101 @@
+<template>
+  <view class="weui-cells weui-cells_after-title">
+    <checkbox-group bindchange="checkboxChange" id="relatedUsers">
+      <label class="weui-cell weui-check__label" wx:for="{{owners}}" wx:key='{{item.id}}'>
+        <checkbox class="weui-check" value="{{item.id}}-{{item.name}}" checked="{{item.checked}}"/>
+
+        <view class="weui-cell__hd weui-check__hd_in-checkbox">
+          <icon class="weui-icon-checkbox_circle" type="circle" size="23" wx:if="{{!item.checked}}"></icon>
+          <icon class="weui-icon-checkbox_success" type="success" size="23" wx:if="{{item.checked}}"></icon>
+        </view>
+        <view class="weui-cell__bd">{{item.name}}</view>
+      </label>
+    </checkbox-group>
+  </view>
+
+  <view class="page__bd_btn-spacing">
+    <button class="weui-btn" type="primary" @tap="bindSubmit" >完成</button>
+  </view>
+
+</template>
+
+<script>
+import wepy from 'wepy'
+import baseMixin from '../mixins/base'
+
+export default class relatedUsers extends wepy.page {
+  mixins = [baseMixin]
+  data = {
+    owners: undefined,
+    relatedUsers: undefined
+  }
+  watch = {
+    relatedUsers() {
+      let checkboxItems = this.owners
+      for (let i = 0, lenI = checkboxItems.length; i < lenI; ++i) {
+        checkboxItems[i].checked = false
+
+        for (let key in this.relatedUsers) {
+          if (checkboxItems[i].id === this.relatedUsers[key].id) {
+            checkboxItems[i].checked = true
+            break
+          }
+        }
+      }
+      this.owners = checkboxItems
+    }
+  }
+  methods = {
+    checkboxChange(e) {
+      let checkboxItems = this.owners
+      let values = e.detail.value
+      for (let i = 0, lenI = checkboxItems.length; i < lenI; ++i) {
+        checkboxItems[i].checked = false
+
+        for (let j = 0, lenJ = values.length; j < lenJ; ++j) {
+          let pair = values[j].split('-')
+          if (checkboxItems[i].id === pair[0]) {
+            checkboxItems[i].checked = true
+            break
+          }
+        }
+      }
+      this.owners = checkboxItems
+
+      this.relatedUsers = []
+      for (let i = 0, lenI = values.length; i < lenI; ++i) {
+        let pair = e.detail.value[i].split('-')
+        this.relatedUsers.push({
+          id: pair[0],
+          name: pair[1]
+        })
+      }
+
+      // 不保存也能在表格上更新相关人
+      let pages = getCurrentPages()
+      let prevPage = pages[ pages.length - 2 ] // 上一页面
+      prevPage.data.relatedUsers = this.relatedUsers
+    },
+    bindSubmit() {
+      let pages = getCurrentPages()
+      let prevPage = pages[ pages.length - 2 ] // 上一页面
+      prevPage.data.relatedUsers = this.relatedUsers
+      wepy.navigateBack({ // 返回
+        delta: 1
+      })
+    }
+  }
+
+  async onLoad(options) {
+    this.owners = await this.getOwners()
+    if (options.relatedUsers !== 'undefined') {
+      this.relatedUsers = JSON.parse(decodeURIComponent(options.relatedUsers))
+      console.log(this.relatedUsers)
+    }
+    this.$apply()
+  }
+}
+</script>
+
+<style lang="less">
+</style>

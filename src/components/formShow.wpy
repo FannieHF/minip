@@ -1,0 +1,335 @@
+<template>
+    <view class="weui-cells__title">目标标题</view>
+    <view class="weui-cells weui-cells_after-title">
+      <view class="weui-cell">
+        <input class="weui-cell__bd" id="name" disabled="{{change.name}}" 
+          value="{{formAttr.name}}" bindinput="bindInput"></input>
+      </view>
+    </view>
+
+    <view class="weui-cells__title">目标描述</view>
+    <view class="weui-cells weui-cells_after-title">
+      <view class="weui-cell">
+        <view class="weui-cell__bd">
+          <textarea id="content" disabled="{{change.content}}" class="weui-textarea" style="height: 3.3em" 
+            value="{{formAttr.content}}" bindinput="bindInput" maxlength='500' adjust-position ></textarea>
+          <view wx:if="{{ !change.content}}" class="weui-textarea-counter">{{restCharLen}}/{{charLenMax}}</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 0级没有完成度; 只有任务在进行中, 完成度才会显示 -->
+    <block wx:if="{{ level > 0 && formAttr.status === 2 }}" > 
+      <view class="page__bd_spacing">
+        <view class="weui-cells__title">完成度</view>
+        <view class="weui-flex">
+          <view class="weui-flex__item completeSlider">
+            <slider show-value id="complete" min="0" max="100" step="10" disabled="{{change.complete}}"
+              value="{{formAttr.complete}}"  bindchange="bindCompleteChange" />
+          </view>
+        </view>
+      </view>
+    </block>
+    
+    <view wx:if="{{ formAttr.status === 3 }}" class="weui-cells__title">实际用时</view>
+    <view wx:else class="weui-cells__title">时间范围</view>
+    <view class="weui-cells weui-cells_after-title">
+      <view class="weui-cell weui-cell_input">
+        <view class="weui-cell__hd">
+          <view class="weui-label">起始时间</view>
+        </view>
+        <view class="weui-cell__bd">
+          <picker mode="date" id="expectedStartDate" disabled="{{change.expectedStartDate}}" 
+            value="{{formAttr.expectedStartDate}}" bindchange="bindPickerChange">
+            <view wx:if="{{ formAttr.status === 3 }}" class="weui-input">{{formAttr.actualStartDate}}</view>
+            <view wx:else  class="weui-input">{{formAttr.expectedStartDate}}</view>
+          </picker>
+        </view>
+      </view>
+
+      <view class="weui-cell weui-cell_input">
+        <view class="weui-cell__hd">
+          <view class="weui-label">完成时间</view>
+        </view>
+        <view class="weui-cell__bd">
+          <picker mode="date" id="expectedEndDate" disabled="{{change.expectedEndDate}}" 
+            value="{{formAttr.expectedEndDate}}" bindchange="bindPickerChange">
+            <view wx:if="{{ formAttr.status === 3 }}" class="weui-input">{{formAttr.actualEndDate}}</view>
+            <view wx:else  class="weui-input">{{formAttr.expectedEndDate}}</view>
+          </picker>
+        </view>
+      </view>
+    </view>
+
+    <view class="weui-cells__title">优先级</view>
+    <view class="weui-cells weui-cells_after-title">
+      <view class="weui-cell weui-cell_select">
+        <view class="weui-cell__bd">
+          <picker value="{{formAttr.priority - 1}}" disabled="{{change.priority}}"
+            range="{{priors}}" id="priority" bindchange="bindPickerChange"  >
+            <view class="weui-select">{{priors[formAttr.priority - 1]}}</view>
+          </picker>
+        </view>
+      </view>
+    </view>
+
+    <block wx:if="{{ level > 0}}" >
+      <view class="weui-cells__title">一号位</view>
+      <view class="weui-cells weui-cells_after-title">
+        <view class="weui-cell weui-cell_select">
+          <view class="weui-cell__bd">
+            <picker range-key="name" value="{{formAttr.owner}}" id="owner" disabled="{{change.owner}}"
+              range="{{owners}}" bindchange="bindOwnerChange" mode="selector">
+              <view wx:if="{{formAttr.owner}}" class="weui-select">{{formAttr.owner.name}}</view>
+              <view wx:else class="weui-select">无</view>
+            </picker>
+          </view>
+        </view>
+      </view>
+    
+      <view class="weui-cells__title">相关人员</view>
+      <navigator url="{{setConcernedUrl}}" class="weui-cells weui-cells_after-title"  disabled="{{change.relatedUsers}}">
+        <view class="concerned_text weui-cell">
+          <block wx:if="{{ formAttr.relatedUsers && formAttr.relatedUsers.length !== 0 }}"  wx:for="{{formAttr.relatedUsers}}" wx:key="{{item.id}}">
+            {{item.name}} 
+          </block>
+          <block wx:if="{{ formAttr.status < 3 }}" >
+            <image class="add-image weui-flex__item" src="../images/icon/add.svg" mode="aspectFit"/>
+          </block>
+        </view>
+      </navigator>
+    </block>
+
+    <block wx:if="{{formAttr.goalProgressDescs && formAttr.goalProgressDescs.length > 0}}" >
+      <view class="weui-cells__title">完成情况描述</view>
+      <view class="weui-cells weui-cells_after-title">
+        <view wx:if="{{formAttr.goalProgressDescs[0].completeDesc}}" class="weui-cell">
+          {{formAttr.goalProgressDescs[0].completeDesc}} </view>
+        <view wx:else class="weui-cell">(无详细描述)</view>
+      </view>
+    </block>
+
+    <block wx:if="{{formAttr.goalProgressDescs && formAttr.goalProgressDescs.length > 0}}" >
+      <view class="weui-cells__title">资源使用情况描述</view>
+      <view class="weui-cells weui-cells_after-title">
+        <view wx:if="{{formAttr.goalProgressDescs[0].resourceUsageDesc}}" class="weui-cell">
+          {{formAttr.goalProgressDescs[0].resourceUsageDesc}} </view>
+        <view wx:else class="weui-cell">(无详细描述)</view>
+      </view>
+    </block>
+
+    <view class="page__bd_btn-spacing">
+      <block wx:if="{{formAttr.status < 3}}" >
+        <button class="weui-btn" type="default" style="flex: 1;" @tap="changeStatus">{{ formAttr.status == 1 ? "开始": "终止" }}</button>
+        <button class="weui-btn" type="primary" style="flex: 1;" @tap="bindSubmit">保存</button>
+      </block>
+    </view>
+
+    <view class="page__bd_btn-spacing"></view>
+
+
+  <toast />
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import moment from 'moment'
+  import toast from 'wepy-com-toast'
+  import toastMixin from '../mixins/toast.js'
+  import formMixin from '../mixins/form.js'
+  import { service } from '../config.js'
+
+  export default class formShow extends wepy.component {
+    mixins = [toastMixin, formMixin]
+    props = {
+      level: {
+        type: [String, Number],
+        default: undefined
+      }
+    }
+    data = {
+      owners: undefined,
+      formAttr: {},
+      complete: undefined,
+      itemId: undefined,
+      parentId: undefined,
+      uselessAttr: ['status', 'goalProgressDescs'],
+
+      change: {
+        name: false,
+        content: false,
+        expectedStartDate: false,
+        expectedEndDate: false,
+        owner: false,
+        relatedUsers: false,
+        priority: false,
+        complete: false
+      }
+    }
+    getDetail(itemId) {
+      let that = this
+      return wepy.request({
+        url: service.getGoal + itemId,
+        method: 'GET',
+        header: wepy.$instance.globalData.header
+      }).then(({data}) => {
+        if (data.status === 0) {
+          wepy.setNavigationBarTitle({ title: data.value.name })
+
+          // 精简数据
+          that.formAttr = data.value
+          that.formAttr.owner = that.formAttr.owner ? { id: that.formAttr.owner.id, name: that.formAttr.owner.name } : that.formAttr.owner
+          if (data.value.parent) that.parentId = data.value.parent.id
+          this.$apply()
+          return data.value.status
+        } else {
+          that.showToast(data.msg)
+        }
+      })
+    }
+
+    watch = {
+      complete(newVariable, oldVariable) {
+        var that = this
+        if (this.complete !== 100) {
+          this.submit(false, false)
+        } else {
+          wx.showModal({
+            title: '完成这项任务',
+            success: async function(res) {
+              // 用户点击确定
+              if (res.confirm) {
+                let result = await that.submit(false, false)
+                if (result === 'success') {
+                  wepy.navigateTo({
+                    url: '/pages/complete?itemId=' + that.itemId
+                  })
+                } else {}
+              // 用户点击确定
+              } else {
+                if (oldVariable) that.formAttr.complete = oldVariable
+                that.complete = that.formAttr.complete
+                that.$apply()
+              }
+            }
+          })
+        }
+      }
+    }
+
+    computed = {
+      setConcernedUrl() {
+        if (this.formAttr.status > 2) return ''
+        return '/pages/relatedUsers?relatedUsers=' + encodeURIComponent(JSON.stringify(this.formAttr.relatedUsers))
+      }
+    }
+
+    events = {
+      'showDetail': async ($event, data) => {
+        let status = await this.getDetail(data.source.itemId)
+        if (status > 2) {
+          this.switchAll(true)
+        }
+        this.itemId = data.source.itemId
+        this.restCharLen = this.formAttr.content ? (this.charLenMax - this.formAttr.content.length) : this.charLenMax
+        this.$apply()
+      },
+      'changeConcerned': ($event, data) => {
+        this.formAttr.relatedUsers = data.source.relatedUsers
+      }
+    }
+
+    components = {
+      toast
+    }
+    async submit(show, jump) {
+      // 校验
+      if (moment(this.formAttr.expectedStartDate).isAfter(moment(this.formAttr.expectedEndDate))) {
+        this.showToast('开始日期不能晚于结束日期')
+        return
+      }
+
+      // 去除undefined
+      let requestData = {}
+      for (let key in this.formAttr) {
+        if ((this.uselessAttr.indexOf(key) === -1) && this.formAttr[key] !== undefined) {
+          requestData[key] = this.formAttr[key]
+        }
+      }
+      return wepy.request({
+        url: service.editGoal + this.itemId,
+        data: requestData,
+        header: wepy.$instance.globalData.header,
+        method: 'PUT'
+      }).then(({data}) => {
+        if (data.status === 0) {
+          if (show) this.showToast(data.msg)
+          if (this.level === 0 || jump) {
+            wepy.navigateBack({
+              delta: 1
+            })
+          }
+          return 'success'
+        } else {
+          this.showToast(data.msg)
+          return 'fail'
+        }
+      })
+    }
+
+    methods = {
+      bindCompleteChange(e) {
+        this.formAttr[e.currentTarget.id] = parseInt(e.detail.value)
+        this.complete = parseInt(e.detail.value)
+      },
+      bindOwnerChange(e) {
+        this.formAttr.owner = this.owners[e.detail.value]
+      },
+      bindSubmit() {
+        this.submit(true, true)
+      }
+    }
+    onLoad() {
+      this.owners = wepy.$instance.globalData.owners
+    }
+  }
+</script>
+
+<style lang="less">
+.page__bd_btn-spacing{
+  margin: 80rpx 0x;
+  display: flex;
+  justify-conetent: space-between;
+
+
+  & > .weui-btn{
+    margin: 60rpx 10rpx 40rpx 10rpx;
+    padding: 0px 40rpx;
+  }
+}
+.page__title{
+  font-weight: 400;
+  font-size: 44rpx;
+  padding: 40rpx;
+}
+.completeSlider{
+  flex: 3;
+}
+.completeBtn{
+  line-height: 2em;
+}
+.weui-cell {
+  border-width: 0;
+}
+.concerned_text {
+  padding: 20rpx 30rpx;
+  min-height: 80rpx;
+  box-sizing: border-box;
+}
+.add-image{
+  min-width: 50rpx;
+  max-width: 50rpx;
+  height: 50rpx;
+  padding: 0px 20rpx;
+}
+</style>

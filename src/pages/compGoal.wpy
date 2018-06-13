@@ -1,0 +1,213 @@
+<template>
+  <view class="page">
+    <view class="page__bd">
+
+      <!-- filter -->
+      <view class="filterBar"> 
+
+        <view class="weui-cell__bd dateTime-filter">
+          <picker bindchange="bindPickerChange" id="dateIndex" value="{{dateArray[dateIndex]}}" range="{{dateArray}}">
+            <view class="weui-select">时间: {{dateArray[dateIndex]}}</view>
+          </picker>
+        </view>
+        <view class="weui-cell__bd weui-cell__bd_in-select-before status-filter">
+          <picker bindchange="bindPickerChange" id="statusIndex" value="{{statusArray[statusIndex]}}" range="{{statusArray}}">
+            <view class="weui-select">状态: {{statusArray[statusIndex]}}</view>
+          </picker>
+        </view>
+
+      </view>
+
+      <!-- 页面内容 -->
+      <view class="scroll_bd">        
+        <repeat for="{{statusList}}" key="index" item="item">
+        
+          <doubleTapCard :item="item" :level="level"
+              class="weui-media-box_appmsg card">
+            
+            <view slot="constant-content" class="weui-cell"
+              style=" border-color: {{priority.borderColor(item.priority)}}" >
+              <view class="weui-media-box__bd weui-media-box__bd_in-appmsg">
+                <view class="weui-media-box__title">{{item.name}}</view>
+                <view class="weui-media-box__desc">
+                  <view wx:if="{{item.status === 1}}" class="weui-media-box__flex"> 状态: 待处理</view>
+                  <view wx:elif="{{item.status === 2}}" class="weui-media-box__flex"> 状态: 进行中</view>
+                  <view wx:elif="{{item.status === 3}}" class="weui-media-box__flex"> 状态: 已完成</view>
+                  <view wx:else class="weui-media-box__flex"> 状态: 已终止</view>
+                </view>
+              </view>
+            </view>
+          </doubleTapCard>
+
+        </repeat>
+      </view>
+
+      <view class="fixed_panel">
+        <navigator url="/pages/newGoal?level=0" class="weui-media-box weui-media-box_appmsg">
+          <image class="add-image weui-flex__item" src="../images/icon/add.svg" mode="aspectFit"/>
+        </navigator>
+      </view>
+
+    </view>
+  </view>
+
+  <toast /> 
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import toast from 'wepy-com-toast'
+  import moment from 'moment'
+  import doubleTapCard from '../components/card'
+  import { service } from '../config'
+  import baseMixin from '../mixins/base'
+  import toastMixin from '../mixins/toast'
+  import priorwxs from '../wxs/priorityColor.wxs'
+
+  export default class compGoal extends wepy.page {
+    mixins = [ baseMixin, toastMixin ]
+    config = {
+      navigationBarTitleText: '目标管理'
+    }
+    data = {
+      level: 0,
+      statusList: undefined,
+      dateIndex: 0,
+      statusIndex: 0,
+      dateArray: ['全部', '周', '月', '季'],
+      dateCode: ['', 'w', 'M', 'Q'],
+      statusArray: ['全部', '待处理', '进行中', '已完成']
+
+    }
+    wxs = {
+      priority: priorwxs
+    }
+
+    getTaskList(level, date, status) {
+      let data = [{
+        'attrName': 'level',
+        'operator': 'EQ',
+        'attrValue': level
+      }]
+      if (date > 0) {
+        data.push({
+          'attrName': 'actualStartDate',
+          'operator': 'GTE',
+          'attrValue': moment().subtract(1, this.dateCode[date]).format('YYYY-MM-DD')
+        })
+      }
+      if (status > 0) {
+        data.push({
+          'attrName': 'status',
+          'operator': 'EQ',
+          'attrValue': status
+        })
+      }
+      wepy.request({
+        url: service.searchGoal,
+        data,
+        method: 'POST',
+        header: wepy.$instance.globalData.header
+      }).then(({data}) => {
+        if (data.status === 0) {
+          this.statusList = data.value
+          this.$apply()
+        } else {
+          this.showToast(data.msg)
+        }
+      })
+    }
+
+    onShow() {
+      this.getTaskList(this.level, this.dateIndex, this.statusIndex)
+    }
+
+    components = {
+      doubleTapCard,
+      toast
+    }
+    methods = {
+      bindPickerChange(e) {
+        this[e.currentTarget.id] = e.detail.value
+        this.getTaskList(this.level, this.dateIndex, this.statusIndex)
+      }
+    }
+  }
+</script>
+
+<style lang="less">
+  page{
+    width: 100%;
+    height: 100%;
+  }
+  .page,
+  .page__bd{
+    height: 100%;
+    overflow-y: hidden;
+  }
+  .page__bd{
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+  }
+
+  .filterBar {
+    display: flex;
+    background-color: #B5BDC1;
+    font-size: 30rpx;
+
+    .weui-cell__bd {
+      flex: 1
+    }
+  }
+
+  .scroll_bd{
+    flex: 10;
+    box-sizing: border-box;
+    padding-bottom: 120rpx;
+    padding-top: 20rpx;
+    overflow-y: scroll;
+
+    .card {
+      margin-bottom: 40rpx;
+    }
+
+    .weui-cell {
+      width: 100%;
+      box-sizing: border-box;
+      border-width: 0px 0px 0px 20rpx;
+      border-style: solid; 
+      padding-left: 60rpx;
+    }
+    .weui-media-box__desc {
+      justify-content: space-between;
+    }
+    .weui-media-box__flex {
+      text-overflow: ellipsis;
+      width: auto;
+      overflow: hidden;
+      white-space: nowrap;
+      word-wrap: normal;
+      word-wrap: break-word;
+      word-break: break-all;
+    }
+  }
+
+  .fixed_panel {
+    background-color: #DDDDDD;
+    height: 100rpx;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+
+    .add-image{
+      max-width: 100rpx;
+      height: 100rpx;
+      transform: translateY(-40rpx);
+    }
+  }
+
+</style>

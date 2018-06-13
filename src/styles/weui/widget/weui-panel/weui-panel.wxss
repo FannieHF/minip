@@ -24,8 +24,8 @@
     font-size: 13px;
     position: relative;
     &:after {
-        .setBottomLine(@weuiLineColorLight);
-        left: 15px;
+      .setBottomLine(@weuiLineColorLight);
+      left: 15px;
     }
 }
 

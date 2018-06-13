@@ -1,0 +1,164 @@
+<template>
+  <view class="weslide-card">
+    <view class="weconstant-side" style="flex: {{constantFlex}}; background-color: {{bgcolor}}" @touchstart="touchStart" @touchend="touchEnd" >
+      <slot name="constant-content"></slot>
+    </view>
+    <view class="weslide-side" style="flex: {{$_slideFlex}}; background-color: {{bgcolor}}" @tap.stop="editTap">
+      <view class="weslide-side__content" style="background-color: {{btncolor}}; color: {{bgcolor}}">
+        <view>详情</view>
+      </view>
+    </view>
+    <view wx:if="{{level > 0}}" class="weslide-side" style="flex: {{$_slideFlex}}; background-color: {{bgcolor}}" @tap.stop="commentTap">
+      <view class="weslide-side__content" style="background-color: {{btncolor}}; color: {{bgcolor}}">
+        <view>评价</view>
+      </view>
+    </view>
+  </view>
+  
+</template>
+
+<script>
+import wepy from 'wepy'
+
+export default class DoubleTapCard extends wepy.component {
+  data = {
+    $_slideFlex: 0,
+    touchStartClientX: 0,
+    touchEndClientX: 0,
+    lastTapDiffTime: 0,
+    // timer: undefined,
+    constantFlex: 4,
+    bgcolor: undefined,
+    btncolor: undefined,
+    slideFlex: 1,
+    offsetXLimit: 30,
+    offsetYLimit: 30
+  }
+  props = {
+    item: Object,
+    level: Number
+  }
+  watch = {
+    // lastTapDiffTime(curValue, oldValue) {
+    //   if (curValue - oldValue < 300) {
+    //     this.$_slideFlex = Math.abs(this.$_slideFlex - this.slideFlex)
+    //     this.$apply()
+    //     clearTimeout(this.timer)
+    //   } else {
+    //     let that = this
+    //     this.timer = setTimeout(function() {
+    //       console.log(that.url + that.item.id + '&title=' + that.item.name)
+    //       wx.navigateTo({
+    //         url: that.url + that.item.id + '&title=' + that.item.name
+    //       })
+    //     }, 300)
+    //   }
+    // }
+  }
+
+  computed = {
+    level() {
+      switch (this.level) {
+        case 0:
+          this.url = '/pages/levelOneList?level=' + this.level + '&parentId='
+          this.bgcolor = '#115765'
+          this.btncolor = '#DAECEF'
+          break
+        default:
+          this.url = '/pages/editGoal?level=' + this.level + '&itemId='
+          this.bgcolor = '#46515D'
+          this.btncolor = '#DDDDDD'
+          break
+      }
+    }
+  }
+  methods = {
+    touchStart(e) {
+      this.touchStartClientX = e.touches[0] ? e.touches[0].clientX : 0
+      this.touchStartClientY = e.touches[0] ? e.touches[0].clientY : 0
+    },
+    touchEnd(e) {
+      this.touchEndClientX = e.changedTouches[0]
+        ? e.changedTouches[0].clientX
+        : 0
+      this.touchEndClientY = e.changedTouches[0]
+        ? e.changedTouches[0].clientY
+        : 0
+      const offsetX =
+        Number(this.touchStartClientX) - Number(this.touchEndClientX)
+      const offsetY =
+        Number(this.touchStartClientY) - Number(this.touchEndClientY)
+      if (offsetX > this.offsetXLimit & Math.abs(offsetY) < this.offsetYLimit) {
+        this.$_slideFlex = this.slideFlex
+      } else if (-offsetX > this.offsetXLimit & Math.abs(offsetY) < this.offsetYLimit) {
+        this.$_slideFlex = 0
+      } else if (Math.abs(offsetY) < this.offsetYLimit) {
+        if (this.level === 0) {
+          wx.navigateTo({
+            url: this.url + this.item.id + '&title=' + this.item.name
+          })
+        } else {
+          this.$emit('tapCard', this.item.id)
+        }
+      }
+    },
+    doubleTap(e) {
+      // if (this.level === 1) {
+      console.log(this.url + this.item.id + '&title=' + this.item.name)
+      wx.navigateTo({
+        url: this.url + this.item.id + '&title=' + this.item.name
+      })
+      // } else {
+      //   this.lastTapDiffTime = e.timeStamp
+      // }
+    },
+    editTap(e) {
+      wx.navigateTo({
+        url: '/pages/editGoal?itemId=' + this.item.id + '&level=' + this.level
+      })
+    },
+    commentTap(e) {
+      wx.navigateTo({
+        url: '/pages/commentList?itemId=' + this.item.id
+      })
+    }
+  }
+}
+</script>
+
+<style scoped>
+.weslide-card {
+  display: flex;
+  width: 100%;
+  height: 160rpx;
+  color: #fff;
+  padding: 0px;
+  overflow: hidden;
+}
+.weconstant-side{
+  display: flex;
+  height: 100%;
+  overflow: hidden;
+}
+.weslide-side {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  overflow: hidden;
+  transition: all 0.5s;
+  height: 100%;
+}
+.weslide-side__content{
+  min-width: 100rpx;
+  width: 100rpx;
+  align-items: center;
+  justify-content: center;
+  font-size: 35rpx;
+  border-radius: 50rpx;
+  height: 100rpx;
+  color:  #115765;
+  text-align: center;
+  vertical-align: center;
+  display: flex;
+}
+</style>

@@ -1,0 +1,102 @@
+<template>
+  <view class="page">
+    <view class="page__bd">
+
+      <!-- tab导航栏 -->
+      <view class="weui-navbar">
+        <block wx:for="{{tabs}}" wx:key="*this">
+          <view id="{{index}}" class="weui-navbar__item {{activeTab == index ? 'weui-bar__item_on' : ''}}" @tap="tabClick">
+            <view class="weui-navbar__title">{{item}}</view>
+          </view>
+        </block>
+        <view class="weui-navbar__slider" style="width: {{sliderWidth}}px; left: {{sliderLeft}}px; transform: translateX({{sliderOffset}}px); -webkit-transform: translateX({{sliderOffset}}px);"></view>
+      </view>
+
+      <!-- 页面内容 -->
+      <view class="tab-box" duration="300" bindchange="switchNav">        
+        <view class="weui-tab__content tab-content" hidden="{{activeTab != 0}}" >
+          <formShow :level.sync="level"/>
+        </view>      
+        <view class="weui-tab__content tab-content" hidden="{{activeTab != 1}}" >
+          <comments :level.sync="level" :itemId.sync="itemId"/>
+        </view>
+      </view>
+
+    </view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import formShow from '../components/formShow'
+  import comments from '../components/comments'
+  import navbarMixin from '../mixins/navBar'
+
+  export default class editWithComment extends wepy.page {
+    mixins = [navbarMixin]
+    config = {
+      navigationBarTitleText: '目标管理'
+    }
+    data = {
+      itemId: undefined,
+      relatedUsers: undefined,
+      tabs: [ '详情', '评价' ],
+      sliderWidth: 180,
+      level: undefined
+    }
+
+    onLoad(options) {
+      this.itemId = options.itemId
+      this.name = options.name
+      this.level = options.level
+      wepy.setNavigationBarTitle({ title: options.name })
+      this.$broadcast('showDetail', options.itemId)
+      this.activeTab = options.activeTab ? options.activeTab : 0
+      this.initNavBar()
+    }
+
+    onShow() {
+      let pages = getCurrentPages()
+      let currPage = pages[pages.length - 1]
+      if (currPage.data.relatedUsers) {
+        this.relatedUsers = currPage.data.relatedUsers
+        this.$broadcast('changeConcerned', this.relatedUsers)
+      }
+    }
+
+    components = {
+      formShow,
+      comments
+    }
+  }
+</script>
+
+<style lang="less">
+
+page{
+  width: 100%;
+  height: 100%;
+}
+.page,
+.page__bd{
+  height: 100%;
+  overflow-y: hidden;
+}
+.page__bd{
+  padding-bottom: 0;
+}
+.weui-navbar{
+  position: fixed;
+  background-color: #dddddd;
+}
+.tab-box{
+  margin-top: 100rpx;
+  height: 90%;
+  box-sizing: content-box;
+  overflow-y: scroll;
+}
+
+.tab-content{
+  overflow-y: hidden;
+}
+</style>

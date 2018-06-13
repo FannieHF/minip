@@ -6,8 +6,8 @@
 @weuiLinkColorDefault: #586C94;
 
 // background
-@weuiBgColorDefault: #EFEFF4;
-@weuiBgColorActive: #ECECEC;
+@weuiBgColorDefault: #D5D5D5;
+@weuiBgColorActive: #D5D5D5;
 
 // line
 @weuiLineColorLight: #E5E5E5;

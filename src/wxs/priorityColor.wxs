@@ -1,0 +1,12 @@
+module.exports = {
+  borderColor: function(priority) {
+    switch (priority) {
+      case 1:
+        return '#CC2900'
+      case 2:
+        return '#FECF1D'
+      case 3:
+        return '#2CC0E6'
+    }
+  }
+}

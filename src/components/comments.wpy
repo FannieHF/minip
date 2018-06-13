@@ -1,0 +1,201 @@
+<template>
+  <view class="page__bd">
+
+    <block wx:if="{{evaluationList.length !== 0}}">
+      <view class=".all-comments">
+        <view class="weui-cells__title">所有评价</view>
+        <view class="weui-panel__bd weui-cells_after-title">
+          <block wx:for="{{evaluationList}}" wx:key="index" item="item">
+            <view class="weui-cell" hover-class="weui-cell_active">
+              <view class="weui-media-box__hd weui-media-box__hd_in-appmsg">
+                {{item.score}}
+              </view>
+              <view class="weui-media-box__bd weui-media-box__bd_in-appmsg">
+                <view class="weui-media-box__title">{{commentType[item.type - 1]}}</view>
+                <view class="weui-media-box__desc">
+                  <view wx:if="{{item.description}}" class="weui-media-box__flex">{{item.description}}</view>
+                  <view wx:else="{{item.description}}" class="weui-media-box__flex">（无具体评价）</view>
+                </view>
+              </view>
+            </view>
+          </block>
+        </view>
+      </view>
+    </block>
+    
+
+    <view class="weui-cells__title">评分维度</view>
+    <view class="weui-cells weui-cells_after-title">
+      <view class="weui-cell weui-cell_select">
+        <view class="weui-cell__bd">
+          <picker value="{{formAttr.type - 1}}" id="type"
+            range="{{commentType}}" id="type" bindchange="bindPickerChange"  >
+            <view class="weui-select">{{commentType[formAttr.type - 1]}}</view>
+          </picker>
+        </view>
+      </view>
+    </view>
+
+    <view class="weui-cells__title">分数</view>
+    <view class="weui-cells_after-title">
+      <view class="weui-cell weui-cell_select">
+        <view class="weui-cell__bd">
+          <selectTab total="5" id="score" />
+        </view>
+      </view>
+    </view>
+
+
+    <view class="weui-cells__title">评价</view>
+    <view class="weui-cells weui-cells_after-title">
+      <view class="weui-cell">
+        <view class="weui-cell__bd">
+          <textarea id="description" class="weui-textarea" style="height: 5em" 
+            value="{{formAttr.description}}" bindinput="bindInput" maxlength='250' adjust-position ></textarea>
+          <view class="weui-textarea-counter">{{restCharLen}}/{{charLenMax}}</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="page__bd_btn-spacing">
+      <button class="weui-btn" type="primary" style="flex: 1;" @tap="bindSubmit">保存</button>
+    </view>
+
+  </view>
+
+  <toast /> 
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import toast from 'wepy-com-toast'
+  import selectTab from '../components/selectTab'
+  import { service } from '../config'
+  import formMixin from '../mixins/form.js'
+  import toastMixin from '../mixins/toast'
+
+  export default class comments extends wepy.component {
+    mixins = [formMixin, toastMixin]
+    props = {
+      itemId: {
+        type: [ String, Number ],
+        default: undefined
+      }
+    }
+    data = {
+      commentType: [ '目标清晰度', '优先级安排', '一号位安排', '相关部门的评价' ],
+      evaluationList: undefined,
+      charLenMax: 250,
+      restCharLen: 250,
+
+      formAttr: {
+        description: undefined,
+        type: 1,
+        score: undefined
+      }
+    }
+
+    getEvaluations(itemId) {
+      wepy.request({
+        url: service.getEvaluation + itemId + '/goalevaluations',
+        method: 'GET',
+        header: wepy.$instance.globalData.header
+      }).then(({data}) => {
+        if (data.status === 0) {
+          this.evaluationList = data.value
+          this.$apply()
+        } else {
+          this.showToast(data.msg)
+        }
+      })
+    }
+
+    events = {
+      'showDetail': ($event, data) => {
+        this.getEvaluations(data.source.itemId)
+        this.itemId = data.source.itemId
+      },
+      'selected': ($event, data) => {
+        this.formAttr.score = data.source.currentValue
+      }
+    }
+
+    methods = {
+      bindSubmit() {
+        let that = this
+        this.formAttr.goal = {id: this.itemId}
+        wepy.request({
+          url: service.getEvaluation + this.itemId + '/goalevaluations',
+          data: this.formAttr,
+          header: wepy.$instance.globalData.header,
+          method: 'POST'
+        }).then(({data}) => {
+          if (data.status === 0) {
+            that.getEvaluations(that.itemId)
+            that.formAttr.description = undefined
+            that.restCharLen = that.charLenMax
+            that.$apply()
+          } else {
+            that.showToast(data.msg)
+          }
+        })
+      }
+    }
+    components = {
+      toast,
+      selectTab
+    }
+}
+
+</script>
+
+<style lang="less">
+  .weui-panel {
+    background: none;
+  }
+  
+  .all-comments {
+    word-wrap: normal;
+    word-break: break-word;
+
+    .weui-panel__bd {
+      background-color: #115765;
+      border-color: #fff;
+      color: #fff;
+
+      .weui-media-box__title {
+        color: #8CB1B9;
+        font-size: 26rpx;
+      }
+
+      .weui-media-box__desc {
+        color: #fff;
+        font-size: 34rpx;
+      }
+    }
+  }
+  .weui-cell {
+    display: flex;
+    width: 100%;
+    box-sizing: border-box;
+    border-width: 0px;
+  }
+  .weui-media-box__desc {
+    display: flex;
+    justify-content: space-between;
+  }
+  .weui-media-box__flex {
+    flex: 1;
+  }
+
+  .page__bd_btn-spacing{
+    margin: 40rpx 0x;
+    display: flex;
+    justify-conetent: space-between;
+
+    & > .weui-btn{
+      margin: 60rpx 10rpx 40rpx 10rpx;
+      padding: 0px 40rpx;
+    }
+  }
+</style>

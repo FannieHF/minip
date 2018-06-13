@@ -1,1 +1,0 @@
-{"pages":["pages/index","pages/user"],"window":{"navigationBarTitleText":"我的数坤","navigationBarTextStyle":"white","navigationBarBackgroundColor":"#249AFA","backgroundColor":"#eaeaea","backgroundTextStyle":"light","enablePullDownRefresh":true},"networkTimeout":{"request":5000,"downloadFile":10000},"debug":true}

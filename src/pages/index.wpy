@@ -1,67 +1,78 @@
 <template>
   <view class="page-index">
     <view class="page__hd">
-        <view class="page__title">Grid</view>
+        <view class="page__title">数坤（北京）网络科技有限公司 </view>
     </view>
+
+
     <view class="page__bd">
-        <view class="weui-grids">
-            <block wx:for="0" wx:key="*this">
-                <navigator url="/pages/user" class="weui-grid" hover-class="weui-grid_active">
-                    <view class="weui-grid__label">计划管理</view>
-                </navigator>
-            </block>
-            <block wx:for="{{grids}}" wx:key="*this">
-                <navigator url="" class="weui-grid" hover-class="weui-grid_active">
-                    <view class="weui-grid__label">Grid</view>
-                </navigator>
-            </block>
-        </view>
+      <view class="weui-grids">
+        <block wx:for="0" wx:key="*this">
+
+          <navigator url="/pages/compGoal" class="weui-grid" hover-class="weui-grid_active">
+            <image class="weui-grid__icon" src="/images/icon/date.svg" mode="aspectFit"/>
+            <view class="weui-grid__label">目标管理</view>
+          </navigator>
+        </block>
+        <!--
+        <block wx:for="1" wx:key="*this">
+          <navigator url="/pages/schedule/dept/showDept" class="weui-grid" hover-class="weui-grid_active">
+            <view class="weui-grid__label">用户信息</view>
+          </navigator>
+        </block>
+        -->
+        <block wx:for="{{grids}}" wx:key="*this">
+          <navigator url="" class="weui-grid" hover-class="weui-grid_active">
+            <image class="weui-grid__icon" src="/images/icon/settings.svg" mode="aspectFit"/>
+            <view class="weui-grid__label">Grid</view>
+          </navigator>
+        </block>
+      </view>
     </view>
   </view>
 </template>
 
 <script>
   import wepy from 'wepy'
-  import { service } from '../config.js'
-  import base from '../mixins/base'
-  import http from '../mixins/http'
 
   export default class pageIndex extends wepy.page {
-    mixins = [base, http]
     config = {
       navigationBarTitleText: '我的数坤',
       navigationBarTextStyle: 'white',
-      navigationBarBackgroundColor: '#049BFF'
+      navigationBarBackgroundColor: '#46515D'
     }
     data = {
-      grids: [ 1, 2, 3, 4, 5, 6, 7, 8]
-    }
-
-    onReady() {
-      this.initPageData()
-    }
-
-    onPullDownRefresh() {
-      this.initPageData()
-    }
-
-    onReachBottom() {
-    }
-
-    // 初始化页面数据
-    initPageData() {
-    }
-
-    methods = {
-    }
-
-    components = {
+      grids: [ 1, 2, 3, 4, 5, 6, 7 ]
     }
   }
 </script>
 
 <style lang="less">
-.page-index{
-  // some style
+@import "../styles/custom/fn.less";
+
+.page__hd {
+  padding: 80rpx;
+  padding-bottom: 80rpx;
+}
+.weui-grids{
+  background: none;
+  border: 0rpx;
+  margin: 0px 30px;
+  overflow: hidden;
+}
+.weui-grid {
+  background: #115765;
+  border-right: 1px solid #D9D9D9;
+  border-bottom: 1px solid #D9D9D9;
+}
+
+.weui-grid__label {
+  color: #fff;
+}
+
+.page__title {
+  text-align: left;
+  font-size: 20px;
+  font-weight: 400;
 }
 </style>

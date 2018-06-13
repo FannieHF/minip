@@ -1,0 +1,122 @@
+<template>
+  <view class="page__bd">
+
+    <view class="weui-cells__title">完成情况描述</view>
+    <view class="weui-cells weui-cells_after-title">
+      <view class="weui-cell">
+        <view class="weui-cell__bd">
+          <textarea id="completeDesc" class="weui-textarea" style="height: 5em" 
+            value="{{formAttr.completeDesc}}" bindinput="bindInput" maxlength='250' adjust-position ></textarea>
+          <view class="weui-textarea-counter">{{restCharLen1}}/{{charLenMax}}</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="weui-cells__title">资源使用情况描述</view>
+    <view class="weui-cells weui-cells_after-title">
+      <view class="weui-cell">
+        <view class="weui-cell__bd">
+          <textarea id="resourceUsageDesc" class="weui-textarea" style="height: 5em" 
+            value="{{formAttr.resourceUsageDesc}}" bindinput="bindInput" maxlength='250' adjust-position ></textarea>
+          <view class="weui-textarea-counter">{{restCharLen2}}/{{charLenMax}}</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="page__bd_btn-spacing">
+      <button class="weui-btn" type="primary" style="flex: 1;" @tap="bindSubmit">保存</button>
+    </view>
+
+  </view>
+
+  <toast /> 
+</template>
+
+<script>
+import wepy from 'wepy'
+import toast from 'wepy-com-toast'
+import toastMixin from '../mixins/toast'
+import formMixin from '../mixins/form'
+import { service } from '../config'
+
+export default class complete extends wepy.page {
+  mixins = [toastMixin, formMixin]
+  data = {
+    itemId: undefined,
+    charLenMax: 250,
+
+    formAttr: {
+      completeDesc: undefined,
+      resourceUsageDesc: undefined
+    },
+    restCharLen1: undefined,
+    restCharLen2: undefined
+  }
+  watch = {
+    relatedUsers () {
+      for (let key in this.relatedUsers) {
+        console.log(this.relatedUsers[key])
+      }
+    }
+  }
+  components = {
+    toast
+  }
+  methods = {
+    bindSubmit() {
+      let data = this.formAttr
+      data.complete = 100
+      wepy.request({
+        url: service.goalProgressDesc + this.itemId + '/goalprogressdescs',
+        data,
+        header: wepy.$instance.globalData.header,
+        method: 'POST'
+      }).then(({data}) => {
+        if (data.status === 0) {
+          wepy.navigateBack({ // 返回
+            delta: 2
+          })
+        } else {
+          this.showToast(data.msg)
+        }
+      })
+    },
+    bindInput(e) {
+      this.formAttr[e.currentTarget.id] = e.detail.value
+      if (e.currentTarget.id === 'completeDesc') {
+        this.restCharLen1 = this.charLenMax - e.detail.value.length
+      }
+      if (e.currentTarget.id === 'resourceUsageDesc') {
+        this.restCharLen2 = this.charLenMax - e.detail.value.length
+      }
+    }
+  }
+
+  onLoad(options) {
+    console.log(options)
+    this.restCharLen1 = this.charLenMax
+    this.restCharLen2 = this.charLenMax
+    this.itemId = options.itemId
+  }
+}
+</script>
+
+<style lang="less">
+  .page{
+    height: 100%;
+  }
+  .page__bd{
+    padding-bottom: 0;
+  }
+
+  .page__bd_btn-spacing{
+    margin: 20px 0x;
+    display: flex;
+    justify-conetent: space-between;
+
+    & > .weui-btn{
+      margin: 60rpx 10rpx 40rpx 10rpx;
+      padding: 0px 20px;
+    }
+  }
+</style>
